@@ -1,0 +1,64 @@
+available: true
+callbacks: "const type{\n    accept_cargo_types cargodict\n}\n\nlocal type{\n    cargo\
+  \ iterator\n}\n\naccept_cargo_types ctt:VEHI [] 1 =\n\n\n/*\n The following is a\
+  \ replication of what FIRS is doing for a tertiary industry.\n See: https://github.com/andythenorth/firs/blob/4.4.0/src/templates/produce_tertiary.pynml\n\
+  */\n\n/* On arrival of supplies, clear the stockpile. */\ncb:production_cargo_arrival\
+  \ def{\n    cargo accept_cargo_types loop{\n        result:inputs cargo [] industry:cargo_incoming_waiting\
+  \ cargo [] =\n    }\n}\n\n/* On 256 ticks, do nothing. */\ncb:production_every_256_ticks\
+  \ def{\n    /* TODO -- Bodies currently cannot be empty, so just do some simple\
+  \ math here. */\n    1 1 +\n}\n\ncb:production_initial def{\n    /* Initial production\
+  \ level. Can be changed with cheats. */\n    result:value 16 =\n}\n\ncb:production_change_monthly\
+  \ def{\n    result:value 0 =\n}\n\ncb:production_change_random def{\n    result:value\
+  \ 0 =\n}\n"
+cargoAcceptance:
+- VEHI
+cargoProduction: []
+colour: 207
+fundCostMultiplier: 8
+id: 28
+layout:
+- - - 0
+    - 0
+    - 0
+    - 1
+  - - 1
+    - 1
+    - 1
+    - 1
+  - - 1
+    - 1
+    - 1
+    - 1
+name: Vehicle Distributor
+placement: anywhere
+probabilityInGame: 3
+probabilityMapGen: 10
+prospectChance: 75
+tiles:
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      filename: industries/vehicle-distributor/2.png
+      left: -31
+      top: 0
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/vehicle-distributor/1.png
+      left: -31
+      top: -28
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      filename: industries/vehicle-distributor/4.png
+      left: -31
+      top: 0
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/vehicle-distributor/3.png
+      left: -31
+      top: -28
+type: tertiary

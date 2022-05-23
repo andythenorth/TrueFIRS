@@ -1,0 +1,288 @@
+available: true
+callbacks: "const type{\n    accept_cargo_types cargodict\n    prod_cargo_types cargodict\n\
+  }\n\nlocal type{\n    current_production_ratio integer\n    total_cargo_produced_this_cycle\
+  \ integer\n    total_cargo_to_distribute_this_cycle integer\n\n    cargo iterator\n\
+  }\n\nindustry:storage type{\n    supplied_cycles_remaining_cargo cargodict\n\n \
+  \   total_produced_cargo_available integer\n}\n\naccept_cargo_types ctt:STCB []\
+  \ 4 =\naccept_cargo_types ctt:ZINC [] 2 =\naccept_cargo_types ctt:ACID [] 2 =\n\
+  prod_cargo_types ctt:STSH [] 4 =\nprod_cargo_types ctt:PIPE [] 3 =\nprod_cargo_types\
+  \ ctt:ENSP [] 1 =\n\n\n/*\n The following is a replication of what FIRS is doing\
+  \ for a secondary industry.\n See: https://github.com/andythenorth/firs/blob/4.4.0/src/templates/produce_secondary.pynml\n\
+  */\n\ncb:production_cargo_arrival def{\n    cargo accept_cargo_types loop{\n   \
+  \     supplied_cycles_remaining_cargo cargo []\n            28\n            supplied_cycles_remaining_cargo\
+  \ cargo []\n        industry:cargo_incoming_waiting cargo [] 0 >\n        =\n\n\
+  \        current_production_ratio\n            current_production_ratio\n      \
+  \          accept_cargo_types cargo []\n                0\n            supplied_cycles_remaining_cargo\
+  \ cargo [] 0 >\n            +\n        =\n\n        total_cargo_produced_this_cycle\n\
+  \            total_cargo_produced_this_cycle\n            industry:cargo_incoming_waiting\
+  \ cargo [] current_production_ratio * 8 /\n            +\n        =\n    }\n\n \
+  \   /*\n     When low cargo amounts are delivered, it's possible that final output\n\
+  \     cargo amounts < 1, which means no cargo is distributed. Prevent that by\n\
+  \     stockpiling produced cargo on each production cycle until there is enough\n\
+  \     to distribute. The case is triggered by low amounts being moved to the\n \
+  \    produce cycle as a vehicle gradually unloads, and was noticeable with\n   \
+  \  Road Hog trams.\n    */\n    total_produced_cargo_available total_produced_cargo_available\
+  \ total_cargo_produced_this_cycle + =\n\n    /*\n     Then check min. distributed\
+  \ by dividing over 8, to get the amount divided\n     by max possible output cargos.\
+  \ 8 is the pathological case, this could be\n     made more accurate by checking\
+  \ the lowest output ratio in current economy.\n     For accuracy, this could also\
+  \ store remainders using mod(8) or so, but eh, TMWFTLB?\n    */\n    total_cargo_to_distribute_this_cycle\n\
+  \        total_produced_cargo_available\n        0\n        total_produced_cargo_available\
+  \ 8 >=\n    =\n    total_produced_cargo_available total_produced_cargo_available\
+  \ total_cargo_to_distribute_this_cycle - =\n\n    cargo accept_cargo_types loop{\n\
+  \        result:inputs cargo [] industry:cargo_incoming_waiting cargo [] =\n   \
+  \ }\n    cargo prod_cargo_types loop{\n        result:outputs cargo [] total_cargo_to_distribute_this_cycle\
+  \ prod_cargo_types cargo [] * 8 / =\n    }\n}\n\ncb:production_every_256_ticks def{\n\
+  \    cargo accept_cargo_types loop{\n        supplied_cycles_remaining_cargo cargo\
+  \ [] supplied_cycles_remaining_cargo cargo [] 1 - 0 max =\n    }\n}\n\ncb:production_change_monthly\
+  \ def{\n    result:value 0 =\n}\n\ncb:production_change_random def{\n    result:value\
+  \ 0 =\n}\n"
+cargoAcceptance:
+- STCB
+- ZINC
+- ACID
+cargoProduction:
+- STSH
+- PIPE
+- ENSP
+colour: 160
+fundCostMultiplier: 120
+id: 24
+layout:
+- - - 1
+    - 2
+    - 2
+    - 1
+    - 6
+    - 7
+  - - 1
+    - 2
+    - 2
+    - 1
+    - 6
+    - -1
+  - - 0
+    - 10
+    - 2
+    - 1
+    - 2
+    - 11
+  - - 5
+    - 9
+    - -1
+    - 12
+    - 12
+    - 8
+- - - 3
+    - 3
+    - 0
+    - 5
+  - - 4
+    - 4
+    - 9
+    - 10
+  - - 4
+    - 4
+    - 4
+    - -1
+  - - 3
+    - 3
+    - 3
+    - 13
+  - - 6
+    - 6
+    - 4
+    - 13
+  - - 7
+    - -1
+    - 11
+    - 8
+name: Sheet and Pipe Mill
+placement: anywhere
+probabilityInGame: 0
+probabilityMapGen: 5
+prospectChance: 0
+tiles:
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      filename: industries/sheet-and-pipe-mill/2.png
+      left: -31
+      top: 0
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/sheet-and-pipe-mill/1.png
+      left: -31
+      top: -34
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      filename: industries/sheet-and-pipe-mill/4.png
+      left: -31
+      top: 0
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/sheet-and-pipe-mill/3.png
+      left: -31
+      top: -33
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      filename: industries/sheet-and-pipe-mill/6.png
+      left: -31
+      top: 0
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/sheet-and-pipe-mill/5.png
+      left: -31
+      top: -33
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      filename: industries/sheet-and-pipe-mill/8.png
+      left: -31
+      top: 0
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/sheet-and-pipe-mill/7.png
+      left: -31
+      top: -33
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      filename: industries/sheet-and-pipe-mill/10.png
+      left: -31
+      top: 0
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/sheet-and-pipe-mill/9.png
+      left: -31
+      top: -33
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      filename: industries/sheet-and-pipe-mill/12.png
+      left: -31
+      top: 0
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/sheet-and-pipe-mill/11.png
+      left: -31
+      top: -33
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      filename: industries/sheet-and-pipe-mill/14.png
+      left: -31
+      top: 0
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/sheet-and-pipe-mill/13.png
+      left: -31
+      top: -33
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      filename: industries/sheet-and-pipe-mill/16.png
+      left: -31
+      top: 0
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/sheet-and-pipe-mill/15.png
+      left: -31
+      top: -33
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      filename: industries/sheet-and-pipe-mill/18.png
+      left: -31
+      top: 0
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/sheet-and-pipe-mill/17.png
+      left: -31
+      top: -33
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      filename: industries/sheet-and-pipe-mill/20.png
+      left: -31
+      top: 0
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/sheet-and-pipe-mill/19.png
+      left: -31
+      top: 0
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      filename: industries/sheet-and-pipe-mill/22.png
+      left: -31
+      top: 0
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/sheet-and-pipe-mill/21.png
+      left: -31
+      top: 0
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      filename: industries/sheet-and-pipe-mill/24.png
+      left: -31
+      top: 0
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/sheet-and-pipe-mill/23.png
+      left: -31
+      top: -10
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      filename: industries/sheet-and-pipe-mill/26.png
+      left: -31
+      top: 0
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/sheet-and-pipe-mill/25.png
+      left: -31
+      top: 0
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      filename: industries/sheet-and-pipe-mill/28.png
+      left: -31
+      top: 0
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/sheet-and-pipe-mill/27.png
+      left: -31
+      top: 0
+type: secondary

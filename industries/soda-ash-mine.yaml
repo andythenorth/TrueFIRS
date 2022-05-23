@@ -1,0 +1,237 @@
+available: true
+callbacks: "const type{\n    level_requirements dict\n    random_prod_factor dict\n\
+  \    supply_requirement integer\n\n    accept_cargo_types cargodict\n    prod_cargo_types\
+  \ cargodict\n}\n\nlocal type{\n    total_delivered integer\n    current_production_level\
+  \ integer\n    random_range integer\n\n    i iterator\n    level iterator\n    cargo\
+  \ iterator\n}\n\nindustry:storage type{\n    supplied_cycles_remaining_cargo cargodict\n\
+  \n    base_prod_factor integer\n\n    num_supplies_delivered 27 list\n}\n\nlevel_requirements\
+  \ 0 [] 100 =\nlevel_requirements 16 [] 150 =\nlevel_requirements 16 5 * [] 300 =\n\
+  \nrandom_prod_factor 0 [] 8 =\nrandom_prod_factor 1 [] 12 =\nrandom_prod_factor\
+  \ 5 [] 16 =\nrandom_prod_factor 7 [] 20 =\nrandom_prod_factor 10 [] 24 =\nrandom_prod_factor\
+  \ 11 [] 28 =\nrandom_prod_factor 12 [] 32 =\nrandom_prod_factor 13 [] 36 =\n\nsupply_requirement\
+  \ 8 =\n\naccept_cargo_types ctt:ENSP [] 1 =\nprod_cargo_types ctt:SASH [] 16 =\n\
+  prod_cargo_types ctt:SALT [] 18 =\n\n\n/*\n The following is a replication of what\
+  \ FIRS is doing for a primary industry.\n See: https://github.com/andythenorth/firs/blob/4.4.0/src/templates/produce_primary.pynml\n\
+  */\n\n/* Get the total amount of supplies delivered in last 27 production cycles.\
+  \ */\nfunc:produce_total_supplies_delivered def{\n    i 0 26 [..] loop{\n      \
+  \  total_delivered total_delivered num_supplies_delivered i [] + =\n    }\n}\n\n\
+  /* Calculate current production level, based on delivered supplies. */\nfunc:produce_calculate_current_production_level\
+  \ def{\n    func:produce_total_supplies_delivered ()\n\n    level level_requirements\
+  \ loop{\n        current_production_level\n            level_requirements level\
+  \ []\n            current_production_level\n            total_delivered supply_requirement\
+  \ / level >=\n        =\n    }\n}\n\n/* Set the number of supplied cycles remaining\
+  \ per cargo - used to display 'supplied' (or not) in the industry window. */\nfunc:update_supplied_cycles_remaining_per_cargo\
+  \ def{\n    cargo accept_cargo_types loop{\n        supplied_cycles_remaining_cargo\
+  \ cargo [] supplied_cycles_remaining_cargo cargo [] 1 - 0 max =\n    }\n}\n\n/*\
+  \ Shift the array of supplies_delivered values one place to the left, and zero the\
+  \ last entry. */\nfunc:produce_256_ticks_shift_supplies_delivered def{\n    i 0\
+  \ 25 [..] loop{\n        num_supplies_delivered i [] num_supplies_delivered i 1\
+  \ + [] =\n    }\n    num_supplies_delivered 26 [] 0 =\n}\n\n/* On arrival of supplies,\
+  \ push the amount to perm storage, then clear from stockpile. */\ncb:production_cargo_arrival\
+  \ def{\n    cargo accept_cargo_types loop{\n        num_supplies_delivered 26 []\
+  \ num_supplies_delivered 26 [] industry:cargo_incoming_waiting cargo [] + =\n\n\
+  \        supplied_cycles_remaining_cargo cargo []\n            28\n            supplied_cycles_remaining_cargo\
+  \ cargo []\n        industry:cargo_incoming_waiting cargo [] 0 >\n        =\n  \
+  \  }\n\n    /*\n     Update the production level immediately, so that production\
+  \ level text immediately updates in industry window.\n     Production won't actually\
+  \ increase until next 256 tick production cycle.\n    */\n    func:produce_calculate_current_production_level\
+  \ ()\n\n    cargo accept_cargo_types loop{\n        result:inputs cargo [] industry:cargo_incoming_waiting\
+  \ cargo [] =\n    }\n}\n\n/* On 256 ticks, if supplied, produce extra output cargo\
+  \ at appropriate multiplier. */\ncb:production_every_256_ticks def{\n    func:produce_calculate_current_production_level\
+  \ ()\n    func:update_supplied_cycles_remaining_per_cargo ()\n    func:produce_256_ticks_shift_supplies_delivered\
+  \ ()\n\n    cargo prod_cargo_types loop{\n        result:outputs cargo [] prod_cargo_types\
+  \ cargo [] industry:production_level base_prod_factor current_production_level *\
+  \ * * 16 16 100 * * / =\n    }\n}\n\ncb:production_initial def{\n    /* Highest\
+  \ value in random_prod_factor is 13. */\n    random_range industry:random_bits 14\
+  \ % =\n\n    level random_prod_factor loop{\n        base_prod_factor\n        \
+  \    random_prod_factor level []\n            base_prod_factor\n            random_range\
+  \ level >=\n        =\n    }\n\n    /* Initial production level. Can be changed\
+  \ with cheats. */\n    result:value 16 =\n}\n\ncb:production_change_monthly def{\n\
+  \    result:value 0 =\n}\n\ncb:production_change_random def{\n    result:value 0\
+  \ =\n}\n"
+cargoAcceptance:
+- ENSP
+cargoProduction:
+- SASH
+- SALT
+colour: 169
+fundCostMultiplier: 180
+id: 26
+layout:
+- - - 3
+    - -1
+    - 2
+    - 1
+  - - 0
+    - 6
+    - 5
+    - 8
+  - - 7
+    - 4
+    - -1
+    - 9
+- - - 3
+    - -1
+    - 2
+  - - 0
+    - 6
+    - 5
+  - - 7
+    - 4
+    - 1
+  - - 0
+    - 9
+    - 8
+  - - 7
+    - 6
+    - 5
+- - - 0
+    - 1
+    - 4
+    - 3
+    - -1
+    - 2
+  - - 7
+    - 8
+    - 0
+    - 3
+    - -1
+    - 2
+  - - -1
+    - 4
+    - 7
+    - 6
+    - 5
+    - 9
+- - - 0
+    - 4
+    - 1
+  - - 7
+    - -1
+    - 8
+  - - 3
+    - -1
+    - 2
+  - - 3
+    - -1
+    - 2
+  - - 6
+    - 5
+    - 9
+name: Soda Ash Mine
+placement: anywhere
+probabilityInGame: 4
+probabilityMapGen: 7
+prospectChance: 75
+tiles:
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      id: 2022
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/soda-ash-mine/1.png
+      left: -31
+      top: -88
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      id: 2022
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/soda-ash-mine/2.png
+      left: -31
+      top: -88
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      id: 2022
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/soda-ash-mine/3.png
+      left: -31
+      top: -90
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      id: 2022
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/soda-ash-mine/4.png
+      left: -31
+      top: -74
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      id: 2022
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/soda-ash-mine/5.png
+      left: -31
+      top: -90
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      id: 2022
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/soda-ash-mine/6.png
+      left: -31
+      top: -90
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      id: 2022
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/soda-ash-mine/7.png
+      left: -31
+      top: -90
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      id: 2022
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/soda-ash-mine/8.png
+      left: -31
+      top: -90
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      id: 2022
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/soda-ash-mine/9.png
+      left: -31
+      top: -90
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      id: 2022
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/soda-ash-mine/10.png
+      left: -31
+      top: -90
+type: primary

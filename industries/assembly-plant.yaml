@@ -1,0 +1,214 @@
+available: true
+callbacks: "const type{\n    accept_cargo_types cargodict\n    prod_cargo_types cargodict\n\
+  }\n\nlocal type{\n    current_production_ratio integer\n    total_cargo_produced_this_cycle\
+  \ integer\n    total_cargo_to_distribute_this_cycle integer\n\n    cargo iterator\n\
+  }\n\nindustry:storage type{\n    supplied_cycles_remaining_cargo cargodict\n\n \
+  \   total_produced_cargo_available integer\n}\n\naccept_cargo_types ctt:VPTS []\
+  \ 2 =\naccept_cargo_types ctt:VBOD [] 2 =\naccept_cargo_types ctt:VENG [] 2 =\n\
+  accept_cargo_types ctt:TYRE [] 2 =\nprod_cargo_types ctt:VEHI [] 6 =\nprod_cargo_types\
+  \ ctt:ENSP [] 1 =\nprod_cargo_types ctt:FMSP [] 1 =\n\n\n/*\n The following is a\
+  \ replication of what FIRS is doing for a secondary industry.\n See: https://github.com/andythenorth/firs/blob/4.4.0/src/templates/produce_secondary.pynml\n\
+  */\n\ncb:production_cargo_arrival def{\n    cargo accept_cargo_types loop{\n   \
+  \     supplied_cycles_remaining_cargo cargo []\n            28\n            supplied_cycles_remaining_cargo\
+  \ cargo []\n        industry:cargo_incoming_waiting cargo [] 0 >\n        =\n\n\
+  \        current_production_ratio\n            current_production_ratio\n      \
+  \          accept_cargo_types cargo []\n                0\n            supplied_cycles_remaining_cargo\
+  \ cargo [] 0 >\n            +\n        =\n\n        total_cargo_produced_this_cycle\n\
+  \            total_cargo_produced_this_cycle\n            industry:cargo_incoming_waiting\
+  \ cargo [] current_production_ratio * 8 /\n            +\n        =\n    }\n\n \
+  \   /*\n     When low cargo amounts are delivered, it's possible that final output\n\
+  \     cargo amounts < 1, which means no cargo is distributed. Prevent that by\n\
+  \     stockpiling produced cargo on each production cycle until there is enough\n\
+  \     to distribute. The case is triggered by low amounts being moved to the\n \
+  \    produce cycle as a vehicle gradually unloads, and was noticeable with\n   \
+  \  Road Hog trams.\n    */\n    total_produced_cargo_available total_produced_cargo_available\
+  \ total_cargo_produced_this_cycle + =\n\n    /*\n     Then check min. distributed\
+  \ by dividing over 8, to get the amount divided\n     by max possible output cargos.\
+  \ 8 is the pathological case, this could be\n     made more accurate by checking\
+  \ the lowest output ratio in current economy.\n     For accuracy, this could also\
+  \ store remainders using mod(8) or so, but eh, TMWFTLB?\n    */\n    total_cargo_to_distribute_this_cycle\n\
+  \        total_produced_cargo_available\n        0\n        total_produced_cargo_available\
+  \ 8 >=\n    =\n    total_produced_cargo_available total_produced_cargo_available\
+  \ total_cargo_to_distribute_this_cycle - =\n\n    cargo accept_cargo_types loop{\n\
+  \        result:inputs cargo [] industry:cargo_incoming_waiting cargo [] =\n   \
+  \ }\n    cargo prod_cargo_types loop{\n        result:outputs cargo [] total_cargo_to_distribute_this_cycle\
+  \ prod_cargo_types cargo [] * 8 / =\n    }\n}\n\ncb:production_every_256_ticks def{\n\
+  \    cargo accept_cargo_types loop{\n        supplied_cycles_remaining_cargo cargo\
+  \ [] supplied_cycles_remaining_cargo cargo [] 1 - 0 max =\n    }\n}\n\ncb:production_change_monthly\
+  \ def{\n    result:value 0 =\n}\n\ncb:production_change_random def{\n    result:value\
+  \ 0 =\n}\n"
+cargoAcceptance:
+- VPTS
+- VBOD
+- VENG
+- TYRE
+cargoProduction:
+- VEHI
+- ENSP
+- FMSP
+colour: 141
+fundCostMultiplier: 145
+id: 0
+layout:
+- - - 0
+    - 0
+    - 0
+    - 5
+    - 4
+  - - 1
+    - 1
+    - 1
+    - 5
+    - 6
+  - - 1
+    - 1
+    - 1
+    - 5
+    - 6
+  - - 3
+    - 2
+    - 3
+    - 6
+    - 9
+  - - 7
+    - 8
+    - 7
+    - 8
+    - 9
+name: Assembly Plant
+placement: anywhere
+probabilityInGame: 1
+probabilityMapGen: 5
+prospectChance: 0
+tiles:
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      filename: industries/assembly-plant/2.png
+      left: -31
+      top: 0
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/assembly-plant/1.png
+      left: -31
+      top: -49
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      filename: industries/assembly-plant/4.png
+      left: -31
+      top: 0
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/assembly-plant/3.png
+      left: -31
+      top: -49
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      filename: industries/assembly-plant/6.png
+      left: -31
+      top: 0
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/assembly-plant/5.png
+      left: -31
+      top: -49
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      filename: industries/assembly-plant/8.png
+      left: -31
+      top: 0
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/assembly-plant/7.png
+      left: -31
+      top: -49
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      filename: industries/assembly-plant/10.png
+      left: -31
+      top: 0
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/assembly-plant/9.png
+      left: -31
+      top: -49
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      filename: industries/assembly-plant/12.png
+      left: -31
+      top: 0
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/assembly-plant/11.png
+      left: -31
+      top: -49
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      filename: industries/assembly-plant/14.png
+      left: -31
+      top: 0
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/assembly-plant/13.png
+      left: -31
+      top: -49
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      filename: industries/assembly-plant/16.png
+      left: -31
+      top: 0
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/assembly-plant/15.png
+      left: -31
+      top: -49
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      filename: industries/assembly-plant/18.png
+      left: -31
+      top: 0
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/assembly-plant/17.png
+      left: -31
+      top: -49
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      filename: industries/assembly-plant/20.png
+      left: -31
+      top: 0
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/assembly-plant/19.png
+      left: -31
+      top: -49
+type: secondary

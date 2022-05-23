@@ -1,0 +1,200 @@
+available: true
+callbacks: "const type{\n    accept_cargo_types cargodict\n    prod_cargo_types cargodict\n\
+  }\n\nlocal type{\n    current_production_ratio integer\n    total_cargo_produced_this_cycle\
+  \ integer\n    total_cargo_to_distribute_this_cycle integer\n\n    cargo iterator\n\
+  }\n\nindustry:storage type{\n    supplied_cycles_remaining_cargo cargodict\n\n \
+  \   total_produced_cargo_available integer\n}\n\naccept_cargo_types ctt:SCMT []\
+  \ 4 =\naccept_cargo_types ctt:FECR [] 2 =\naccept_cargo_types ctt:QLME [] 1 =\n\
+  accept_cargo_types ctt:O2__ [] 1 =\nprod_cargo_types ctt:STCB [] 4 =\nprod_cargo_types\
+  \ ctt:STST [] 2 =\nprod_cargo_types ctt:SLAG [] 2 =\n\n\n/*\n The following is a\
+  \ replication of what FIRS is doing for a secondary industry.\n See: https://github.com/andythenorth/firs/blob/4.4.0/src/templates/produce_secondary.pynml\n\
+  */\n\ncb:production_cargo_arrival def{\n    cargo accept_cargo_types loop{\n   \
+  \     supplied_cycles_remaining_cargo cargo []\n            28\n            supplied_cycles_remaining_cargo\
+  \ cargo []\n        industry:cargo_incoming_waiting cargo [] 0 >\n        =\n\n\
+  \        current_production_ratio\n            current_production_ratio\n      \
+  \          accept_cargo_types cargo []\n                0\n            supplied_cycles_remaining_cargo\
+  \ cargo [] 0 >\n            +\n        =\n\n        total_cargo_produced_this_cycle\n\
+  \            total_cargo_produced_this_cycle\n            industry:cargo_incoming_waiting\
+  \ cargo [] current_production_ratio * 8 /\n            +\n        =\n    }\n\n \
+  \   /*\n     When low cargo amounts are delivered, it's possible that final output\n\
+  \     cargo amounts < 1, which means no cargo is distributed. Prevent that by\n\
+  \     stockpiling produced cargo on each production cycle until there is enough\n\
+  \     to distribute. The case is triggered by low amounts being moved to the\n \
+  \    produce cycle as a vehicle gradually unloads, and was noticeable with\n   \
+  \  Road Hog trams.\n    */\n    total_produced_cargo_available total_produced_cargo_available\
+  \ total_cargo_produced_this_cycle + =\n\n    /*\n     Then check min. distributed\
+  \ by dividing over 8, to get the amount divided\n     by max possible output cargos.\
+  \ 8 is the pathological case, this could be\n     made more accurate by checking\
+  \ the lowest output ratio in current economy.\n     For accuracy, this could also\
+  \ store remainders using mod(8) or so, but eh, TMWFTLB?\n    */\n    total_cargo_to_distribute_this_cycle\n\
+  \        total_produced_cargo_available\n        0\n        total_produced_cargo_available\
+  \ 8 >=\n    =\n    total_produced_cargo_available total_produced_cargo_available\
+  \ total_cargo_to_distribute_this_cycle - =\n\n    cargo accept_cargo_types loop{\n\
+  \        result:inputs cargo [] industry:cargo_incoming_waiting cargo [] =\n   \
+  \ }\n    cargo prod_cargo_types loop{\n        result:outputs cargo [] total_cargo_to_distribute_this_cycle\
+  \ prod_cargo_types cargo [] * 8 / =\n    }\n}\n\ncb:production_every_256_ticks def{\n\
+  \    cargo accept_cargo_types loop{\n        supplied_cycles_remaining_cargo cargo\
+  \ [] supplied_cycles_remaining_cargo cargo [] 1 - 0 max =\n    }\n}\n\ncb:production_change_monthly\
+  \ def{\n    result:value 0 =\n}\n\ncb:production_change_random def{\n    result:value\
+  \ 0 =\n}\n"
+cargoAcceptance:
+- SCMT
+- FECR
+- QLME
+- O2__
+cargoProduction:
+- STCB
+- STST
+- SLAG
+colour: 186
+fundCostMultiplier: 160
+id: 12
+layout:
+- - - 1
+    - 0
+    - 8
+    - 8
+  - - 1
+    - 0
+    - 8
+    - 8
+  - - 1
+    - 0
+    - 7
+    - 6
+  - - 1
+    - 0
+    - -1
+    - -1
+  - - 2
+    - 3
+    - 5
+    - 4
+  - - 2
+    - 3
+    - 3
+    - 5
+name: Electric Arc Furnace
+placement: anywhere
+probabilityInGame: 1
+probabilityMapGen: 5
+prospectChance: 0
+tiles:
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      filename: industries/electric-arc-furnace/2.png
+      left: -31
+      top: 0
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/electric-arc-furnace/1.png
+      left: -31
+      top: -45
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      filename: industries/electric-arc-furnace/4.png
+      left: -31
+      top: 0
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/electric-arc-furnace/3.png
+      left: -31
+      top: -45
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      filename: industries/electric-arc-furnace/6.png
+      left: -31
+      top: 0
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/electric-arc-furnace/5.png
+      left: -31
+      top: -32
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      filename: industries/electric-arc-furnace/8.png
+      left: -31
+      top: 0
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/electric-arc-furnace/7.png
+      left: -31
+      top: -32
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      filename: industries/electric-arc-furnace/10.png
+      left: -31
+      top: 0
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/electric-arc-furnace/9.png
+      left: -31
+      top: -32
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      filename: industries/electric-arc-furnace/12.png
+      left: -31
+      top: 0
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/electric-arc-furnace/11.png
+      left: -31
+      top: -32
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      filename: industries/electric-arc-furnace/14.png
+      left: -31
+      top: 0
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/electric-arc-furnace/13.png
+      left: -31
+      top: -32
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      filename: industries/electric-arc-furnace/16.png
+      left: -31
+      top: 0
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/electric-arc-furnace/15.png
+      left: -31
+      top: -32
+- sprites:
+  - alwaysDraw: true
+    drawType: recolour
+    sprite:
+      filename: industries/electric-arc-furnace/18.png
+      left: -31
+      top: 0
+  - alwaysDraw: false
+    drawType: recolour
+    sprite:
+      filename: industries/electric-arc-furnace/17.png
+      left: -31
+      top: -32
+type: secondary
