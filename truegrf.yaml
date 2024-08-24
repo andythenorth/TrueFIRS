@@ -1,4 +1,6 @@
 description: Your first NewGRF based on FIRS4 Steeltown
-grfid: TRU1
+grfid: f17e4048
 name: TrueGRF
-version: 3
+type: industry
+url: https://github.com/andythenorth/TrueFIRS
+version: 6
